@@ -1,0 +1,28 @@
+﻿<#@ template debug="true" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ Assembly Name="System.Core.dll" #>
+<#@ Assembly Name="System.Xml.dll" #>
+<#@ Assembly Name="System.Xml.Linq.dll" #>
+<#@ Assembly Name="System.Windows.Forms.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+ 
+namespace SQLDatabaseQueryContainer
+{
+    public static class <#=entityName#>Queries
+    {
+		public static readonly string StoreProcSelectById = "sp<#=entityName#>SelectById";
+		public static readonly string StoreProcSelectAll = "sp<#=entityName#>SelectAll";
+        public static readonly string StoreProcInsert = "sp<#=entityName#>Insert";
+        public static readonly string StoreProcUpdate = "sp<#=entityName#>Update";       
+		public static readonly string StoreProcDelete = "sp<#=entityName#>Delete";
+    }
+}
+<#+  
+ 
+#>

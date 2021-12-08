@@ -164,7 +164,7 @@ namespace SmartBackend.Controllers
                 viewData.IsSuccess = result.IsSuccess;
                 viewData.Message = result.Error;
             }
-            return Ok(value);
+            return Ok(result);
         }
 
 

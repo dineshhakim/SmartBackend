@@ -1,0 +1,31 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".ts" #>
+<# 
+var cCaseDetailsMod =Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1);
+#>
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from '@angular/forms';
+import { DetailsComponent } from "./details.component";
+import { <#= entityName #>Service} from '../../../../../shared/services/Containers/<#= entityName #>Service/<#= cCaseDetailsMod #>.service';
+import { BreadCrumbsService } from '../../../../../shared/services/breadCrumbs/breadCrumbs.service';
+import { EditorModule, SharedModule, DataTableModule, ButtonModule, InputTextareaModule, ToggleButtonModule, CheckboxModule, InputSwitchModule, InputTextModule, BreadcrumbModule, GrowlModule, PanelModule, DropdownModule, CalendarModule } from 'primeng/primeng';
+import { RouterModule } from "@angular/router";
+import detailsRoutes from "./details.routes";
+import { TitanSharedModule } from '../../../../../shared/Module/titan.shared.module';
+
+import {UserPemissionHelper} from "../../../../../shared/services/Containers/PermissionsService/userPermissionsHelper";
+
+@NgModule({
+    imports: [EditorModule, SharedModule, CommonModule, FormsModule, DataTableModule, InputTextareaModule, InputSwitchModule, CheckboxModule, ToggleButtonModule, GrowlModule, BreadcrumbModule, InputTextModule, PanelModule, 
+        ButtonModule, DropdownModule, CalendarModule, detailsRoutes, TitanSharedModule],
+    providers: [<#= entityName #>Service,BreadCrumbsService, UserPemissionHelper],
+    declarations: [DetailsComponent],
+    exports: [DetailsComponent]
+})
+
+export default class DetailsModule { }

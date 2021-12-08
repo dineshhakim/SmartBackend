@@ -1,0 +1,62 @@
+﻿<#@ template language="C#" hostSpecific="true" #>
+<#@ output extension=".sql" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="Microsoft.SqlServer.Smo" #>
+<#@ assembly name="Microsoft.SqlServer.ConnectionInfo" #>
+
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="Microsoft.SqlServer.Management.Smo" #>
+<#@ import namespace="System.Collections.Generic" #>
+
+<#
+	 
+		
+
+	 string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);      
+	  string cacheRegionPath = Path.GetFullPath(Path.Combine(templateDirectory, "../Titan.Database/dbo/data/Permissions.PostDeployment.sql" ));
+	 
+	  var id=GetMaxPermissionId(connectionString) + 1;
+	  string replacetext = string.Format(@"INSERT @Permissions ([Id], [Name], [Description], [ParentId], [IsMenu], [IsTab], [Order], [UserCreatedById], [CreatedOn], [UserModifiedById], [ModifiedOn], [IsDeleted]) 
+	  VALUES ("+id.ToString()+", N'{0}', N'{0}', 147, 1, 0, 7, N'3bdc1617-d620-65d0-26ef-000e1090a386', CAST(N'2017-09-18 09:52:00.0900000' AS DateTime2), NULL, CAST(N'2017-09-18 09:52:00.0900000' AS DateTime2), 0)" 
+	  + "\n--T4"  , entityName);
+	  var currentText = File.ReadAllText(cacheRegionPath);
+	   RunScript(currentText, connectionString);
+	  if (currentText.IndexOf(replacetext) == -1) {
+			  currentText = currentText.Replace("--T4",replacetext);
+			  File.WriteAllText(cacheRegionPath, currentText); 
+		}
+		RunScript(currentText, connectionString);
+		#>
+<#+
+ 
+     
+	 
+  
+int GetMaxPermissionId(string connectionString)
+ {
+	using (var conn = new SqlConnection(connectionString))
+      {
+        conn.Open();    
+		SqlCommand cmd = new SqlCommand("Select max(id) from [Permissions]", conn);		 
+        cmd.CommandType = CommandType.Text;
+        return (int)cmd.ExecuteScalar();
+      } 
+ }
+ void RunScript(string script, string connectionString)
+ {
+	using (var conn = new SqlConnection(connectionString))
+      {
+        conn.Open();    
+		SqlCommand cmd = new SqlCommand(script, conn);		 
+        cmd.CommandType = CommandType.Text;
+        cmd.ExecuteNonQuery();
+      } 
+ }
+  #>

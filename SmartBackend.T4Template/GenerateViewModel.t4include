@@ -1,0 +1,113 @@
+﻿<#@ template language="C#" hostspecific="true" debug="True" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="Microsoft.SqlServer.Smo" #>
+<#@ assembly name="Microsoft.SqlServer.ConnectionInfo" #>
+<#@ assembly name="Microsoft.SqlServer.Management.Sdk.Sfc" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="Microsoft.SqlServer.Management.Smo" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#
+    //**********************************************************************************************
+    // This T4 generates POCOs from the specified DB and saves them to the specified folder which 
+    // is relative to the template's location. One file per table/POCO.
+    //**********************************************************************************************
+ 
+    //****************************
+    // DEFINE YOUR VARIABLES HERE
+    //****************************
+   // Loop over each table and create a class file!
+     Server viewModelserver = new Server(sqlServer);
+     viewModelserver.ConnectionContext.LoginSecure = true;
+    //server.ConnectionContext.Login = sqlLogin;
+    //server.ConnectionContext.Password = sqlPassword;
+    viewModelserver.ConnectionContext.Connect();
+    
+	List<Table> viewModeltables = new List<Table>();
+	cols = new Dictionary<string,Column>();
+	foreach (Table table in viewModelserver.Databases[sqlDatabase].Tables)
+    {
+	   if (table.Name == tableName || table.Name ==transTableName) {
+		 foreach (Column col in table.Columns)
+			{
+			  if (!cols.ContainsKey(col.Name)){
+			      
+				  // ignoring the FK in Translation Table
+				  if (col.Name == tableName + "Id" ) {
+				    continue;
+				  }
+				  
+				  cols.Add(col.Name, col);
+              }
+			}
+	      viewModeltables.Add(table);
+	   }
+	}
+
+	for (int k =0 ; k<1; k++) 
+
+    //foreach (Table table in server.Databases[sqlDatabase].Tables)
+    {
+       
+#>
+using System;
+using Titan.Model;
+namespace Titan.Model.ViewModels
+{
+    /// <summary>
+    /// Represents a <#= tableName #>.
+    /// NOTE: This class is generated from a T4 template - you should not modify it manually.
+    /// </summary>
+    public class <#=tableName#>ViewModel
+    {
+<# 
+        // Keep count so we don't whitespace the last property/column
+        int columnCount = cols.Count;
+        int i = 0;
+ 
+        // Iterate all columns
+		foreach(KeyValuePair<string,Column> entry in cols)
+        //foreach (Column col in table.Columns)
+        {
+		    Column col = entry.Value;
+            i++;
+            string propertyType = GetNetDataType(col.DataType.Name);
+ 
+            // If we can't map it, skip it
+            if (string.IsNullOrWhiteSpace(propertyType))
+            {
+                // Skip
+                continue;
+            }
+ 
+            // Handle nullable columns by making the type nullable
+            if (col.Nullable && propertyType != "string")
+            {
+                propertyType += "?";
+            }
+#>
+        public <#= propertyType #> <#= col.Name #> { get; set; }
+<#
+            if (i == columnCount && !string.IsNullOrEmpty(transTableName))
+            {
+#>
+		public string DefaultLocale { get; set; }
+<#
+            }
+#>
+<#
+        }
+#>
+    }
+}      
+<#
+        // Write new POCO class to its own file
+        //SaveOutput(table.Name + ".cs", destinationFolder);
+		//CreatePoco(pocoFileName);
+    } 
+#>
+

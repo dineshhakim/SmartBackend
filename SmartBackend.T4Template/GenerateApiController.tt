@@ -1,0 +1,252 @@
+﻿<#@ template  debug="true" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ Assembly Name="System.Core" #>
+<#@ Assembly Name="System.Windows.Forms" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#
+    //string entityName = "ModuleType";
+	string camelCase = LowercaseFirst(entityName);
+	string serviceHandle = string.Format("_{0}{1}",camelCase,"Service" );
+	string repoHandle = string.Format("_{0}{1}",camelCase,"Repository" );
+
+	string servicevariableConst = string.Format("{0}{1}",camelCase,"Service" );
+	string repovariableConst = string.Format("{0}{1}",camelCase,"Repository" );
+
+	string serviceInterfaceName = string.Format("I{0}{1}",entityName,"Service" );
+	string repoInterfaceName = string.Format("I{0}{1}",entityName,"Repository" );
+
+
+#>
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Web.Http;
+using Titan.Core.Common.Extensions;
+using Titan.Core.Common.Service;
+using Titan.Model.ViewModelDB;
+using Titan.Model.ViewModels;
+using Titan.Repository.CoreInterfaces;
+
+namespace Titan.WebApi.Controllers
+{
+	/// <summary>
+    /// <#= entityName #>
+    /// </summary>
+    public class <#= entityName #>Controller : TitanBaseController
+    {
+        private readonly <#= serviceInterfaceName #> <#=serviceHandle #>;
+        private readonly <#= repoInterfaceName #> <#=repoHandle #>;
+
+        public <#= entityName #>Controller(<#= serviceInterfaceName #> <#=servicevariableConst #>, <#= repoInterfaceName #> <#=repovariableConst #>)
+        {
+            <#=serviceHandle #> = <#=servicevariableConst #>;
+            <#=repoHandle #> = <#=repovariableConst #>;
+        }
+         /// <summary>
+         /// Gets all the items that are not deleted.
+         /// Note: There is no pagination enabled and it will return all the items.
+        /// </summary>
+        /// <returns></returns>
+	   [Route("api/<#=entityName#>/GetAll")]
+	   [HttpGet]
+        public HttpResponseMessage GetAll()
+        {
+<#    if (string.IsNullOrEmpty(transTableName)) { #>
+            var result = <#=repoHandle #>.GetAll();
+<#    } else { #>
+            var result = <#=repoHandle #>.GetAll(CurrentUser.Locale);
+<#    } #>
+        IViewModel viewModel = new ViewData()
+            {
+                IsSuccess = false,
+                Message = " Entity not found"
+                };
+        if (result == null)
+        {
+            return Ok(viewModel);
+        }
+
+        viewModel.Message = "Success";
+        viewModel.IsSuccess = true;
+        return Ok(result,viewModel);
+
+    }
+
+        // GET api/<controller>/5
+		/// <summary>
+		/// Get <#= entityName #>
+		/// </summary>
+        [Route("api/<#=entityName#>/GetById/{id}")]
+	   [HttpGet]
+        public HttpResponseMessage GetById(Guid id)
+        {
+            var result = <#=repoHandle #>.GetById(id, CurrentUser.Locale);
+            IViewModel viewModel = new ViewData()
+            {
+               IsSuccess = false,
+               Message = " Entity not found"
+            };
+            if (result == null)
+            {
+               return Ok(viewModel);
+            }
+
+            viewModel.Message = "Success";
+            viewModel.IsSuccess = true;
+            return Ok(result,viewModel);
+
+        }
+
+          // POST api/<controller>
+		/// <summary>
+		/// Create <#= entityName #>
+		/// </summary>
+	   [Route("api/<#=entityName#>")]
+	   [HttpPost]
+        public HttpResponseMessage Post([FromBody] <#= entityName #>CreateDbViewModel value)
+        {
+            value.Id = Guid.NewGuid();
+            value.UserCreatedById = CurrentUser.Id;             
+            value.CreatedOn = DateTime.UtcNow;             
+	       <# if (!string.IsNullOrEmpty(transTableName)) { #>
+				value.Locale = CurrentUser.DefaultLocale;
+				value.DefaultLocale = CurrentUser.DefaultLocale;
+		  <# } #>                  
+            var viewData = new ViewData()
+            {
+                IsSuccess = false,
+                Message = "no dice"
+            };
+
+            /*if (!ModelState.IsValid)
+            {
+                viewData.Message = string.Join("; ", ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage));
+                return Ok(viewData);
+            }*/
+
+            var result = <#=serviceHandle #>.Create(value);
+
+            if (result != null && result.IsSuccess)
+            {
+                viewData.IsSuccess = true;
+                viewData.Message = "Success";
+            }
+			else
+            {
+                viewData.IsSuccess = result.IsSuccess;
+                viewData.Message = result.Error;
+            }
+            return Ok(result,viewData);
+        }
+
+        
+		/// <summary>
+		/// Update <#= entityName #>
+		/// </summary>
+        [Route("api/<#=entityName#>")]
+	   [HttpPut]
+	   public HttpResponseMessage Put([FromBody] <#= entityName #>UpdateDbViewModel value)
+        {
+            value.UserModifiedById = CurrentUser.Id;
+            value.ModifiedOn = DateTime.UtcNow;
+		  <# if (!string.IsNullOrEmpty(transTableName)) { #>
+		  value.Locale = CurrentUser.DefaultLocale;
+		  <# } #>
+           	 var viewData = new ViewData()
+            {
+                IsSuccess = false,
+                Message = "no dice"
+            };
+
+            /*if (!ModelState.IsValid)
+            {
+                viewData.Message = string.Join("; ", ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage));
+                return Ok(viewData);
+            }*/
+
+            var result = <#=serviceHandle #>.Update(value);
+
+            if (result != null && result.IsSuccess)
+            {
+                viewData.IsSuccess = true;
+                viewData.Message = "Success";
+            }
+			else
+            {
+                viewData.IsSuccess = result.IsSuccess;
+                viewData.Message = result.Error;
+            }
+            return Ok(result, viewData);
+        }
+
+		/// <summary>
+		/// Delete <#= entityName #>
+		/// </summary>
+        [HttpDelete]		
+	   [Route("api/<#= entityName #>/Delete/{id}")]
+        public HttpResponseMessage Delete(Guid id)
+        {
+            var viewModel = new <#= entityName #>DeleteDbViewModel();
+            viewModel.Id = id;
+            viewModel.UserModifiedById = CurrentUser.Id;
+            viewModel.ModifiedOn = DateTime.UtcNow;
+			var viewData = new ViewData()
+            {
+                IsSuccess = false,
+                Message = "no dice"
+            };
+
+            /*if (!ModelState.IsValid)
+            {
+                viewData.Message = string.Join("; ", ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage));
+                return Ok(viewData);
+            }*/
+
+            var result = <#=serviceHandle #>.Delete(viewModel);
+
+            if (result != null && result.IsSuccess)
+            {
+                viewData.IsSuccess = true;
+                viewData.Message = "Success";
+            }
+
+            return Ok(result, viewData);
+            
+        }
+    }
+}
+<#+
+	public string LowercaseFirst(string s)
+	{
+		if (string.IsNullOrEmpty(s))
+		{
+			return string.Empty;
+		}
+
+		char[] a = s.ToCharArray();
+		a[0] = char.ToLower(a[0]);
+
+		return new string(a);
+	}
+
+	public string RemoveUnderscore(string s)
+	{
+		if (string.IsNullOrEmpty(s))
+		{
+			return string.Empty;
+		}
+
+		return s.Replace('_',' ');
+	}
+#>

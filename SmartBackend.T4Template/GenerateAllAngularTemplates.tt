@@ -1,0 +1,157 @@
+﻿<#@ template language="C#" hostSpecific="true" #>
+<#@ output extension=".cs" #> 
+<#@ Assembly Name="System.Core" #>
+<#@ Assembly Name="System.Windows.Forms" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ assembly name="System.Xml" #>
+<#@ import namespace="System.Xml" #>
+
+<#
+#>
+<#@ include file="WebCore/GenerateEntityComponentHtml.t4include"  #>  
+<#CreateEntityComponentHtmlFile(); #>
+<#@ include file="WebCore/GenerateEntityComponentTS.t4include"  #>  
+<#CreateEntityComponentTSFile(); #>
+<#@ include file="WebCore/GenerateEntityModuleTS.t4include"  #>  
+<#CreateEntityModuleTSFile(); #>
+<#@ include file="WebCore/GenerateEntityRouteTS.t4include"  #>  
+<#CreateEntityRouteTSFile(); #>
+
+<#@ include file="WebCore/Add/GenerateAddComponentHtml.tt"  #>  
+<#CreateAddComponentHtmlFile(); #>
+<#@ include file="WebCore/Add/GenerateAddComponetTS.tt"  #>  
+<#CreateAddComponentTSFile(); #>
+<#@ include file="WebCore/Add/GenerateAddModule.tt"  #>  
+<#CreateAddModuleTSFile(); #>
+<#@ include file="WebCore/Add/GenerateAddRoutesTS.tt"  #>  
+<#CreateAddRouteTSFile(); #>
+
+<#@ include file="WebCore/Details/GenerateDetailsComponentHtml.tt"  #>  
+<#CreateDetailsComponentHtmlFile(); #>
+<#@ include file="WebCore/Details/GenerateDetailsComponentTS.tt"  #>  
+<#CreateDetailsComponentTSFile(); #>
+<#@ include file="WebCore/Details/GenerateDetailsModuleTS.tt"  #>  
+<#CreateDetailsModuleTSFile(); #>
+<#@ include file="WebCore/Details/GenerateDetailsRoutesTS.tt"  #>  
+<#CreateDetailsRouteTSFile(); #>
+
+<#@ include file="WebCore/Service/GenerateServiceTS.tt"  #>  
+<#CreateServiceTSFile(); #>
+<#@ include file="WebCore/ApiUrls/GenerateApiUrls.tt"  #>  
+<#CreateApiUrlsTSFile(); #>
+
+<#+ 
+  static string entityName = "TimeLogEventType"; 
+
+  string apiControllerFileName = string.Format("../Titan.WebApi/Controllers/{0}Controller.cs",entityName);
+ string entityComponentHtmlName = string.Format("{0}.component.html", Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1));
+ string entityComponentTSName = string.Format("{0}.component.ts", Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1));
+ string entityModuleTSName = string.Format("{0}.module.ts", Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1));
+ string entityRouteTSName = string.Format("{0}.routes.ts", Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1));   
+ 
+  void CreateEntityComponentHtmlFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, this.entityComponentHtmlName));	
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());    
+	  this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+	 
+  }
+  void CreateEntityComponentTSFile()
+  {
+	  string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, this.entityComponentTSName));	
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+	  this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+  }
+  void CreateEntityModuleTSFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, this.entityModuleTSName));	 
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+	   this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+  }
+  void CreateEntityRouteTSFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, this.entityRouteTSName));	 
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+	  this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+  }
+  void CreateAddComponentHtmlFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Add";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "add.component.html"));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+	   this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+  }
+  void CreateAddComponentTSFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Add";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "add.component.ts"));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+	   this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+  }
+  void CreateAddModuleTSFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Add";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "add.module.ts"));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	
+	   this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);   
+  }
+  void CreateAddRouteTSFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Add";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "add.routes.ts"));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+	   this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+  }
+  void CreateDetailsComponentHtmlFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Details";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "details.component.html"));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+	   this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+  }
+  void CreateDetailsComponentTSFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Details";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "details.component.ts"));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+	   this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+  }
+  void CreateDetailsModuleTSFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Details";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "details.module.ts"));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	
+	   this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);   
+  }
+  void CreateDetailsRouteTSFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Details";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "details.routes.ts"));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+	   this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+  }  
+  void CreateServiceTSFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Service";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1) +"."+"service.ts"));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	
+	   this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);   
+  }
+  void CreateApiUrlsTSFile()
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\ApiUrls";
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1) +"ApiUrls.ts"));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+	  this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+  }  
+
+  #>

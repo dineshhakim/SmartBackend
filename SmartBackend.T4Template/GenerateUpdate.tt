@@ -1,0 +1,86 @@
+﻿<#@ template language="C#" hostSpecific="true" #>
+<#@ output extension=".sql" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="Microsoft.SqlServer.Smo" #>
+<#@ assembly name="Microsoft.SqlServer.ConnectionInfo" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="Microsoft.SqlServer.Management.Smo" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#
+	//Commented Bcz You can run it from MultipleOutputFiles and it was erroring out due to multiple instances for file
+	//entityName = "MeasurementParameterCategory";
+	//string transTableName ="";
+    // string connectionString = "Data Source=.;Initial Catalog=TitanDB;Integrated Security=true;";
+    
+	//string sqlUpdateQueryFileName =  string.Format("../SQLDatabaseQueryContainer/{0}Queries.cs",entityName);
+ 
+	
+      using (var conn = new SqlConnection(connectionString))
+      {
+        conn.Open();    
+		SqlCommand cmd = new SqlCommand("pr__SYS_MakeUpdateRecordProc", conn);
+		SetParamsForUpdate(cmd,entityName,transTableName, enableDuplicateCheck);
+        cmd.CommandType = CommandType.StoredProcedure;
+        spUpdatetext = (string)cmd.ExecuteScalar();
+      } 
+#>
+
+<#= spUpdatetext #>
+<# UpdateUpdProjectfile(entityName); #>
+<#+
+	 
+	string spUpdatetext = string.Empty;
+   void SetParamsForUpdate(SqlCommand cmd, string name, string transName, bool enableDuplicateCheck)
+   {
+	    SqlParameter param  = new SqlParameter();
+		param.ParameterName = "@sTableName";
+		param.Value         = name;
+
+		SqlParameter param1  = new SqlParameter();
+		param1.ParameterName = "@bExecute";
+		param1.Value         = true;
+
+		SqlParameter param2  = new SqlParameter();
+		param2.ParameterName = "@sTranslationTableName";
+		param2.Value         = transName;
+        
+        SqlParameter param3  = new SqlParameter();
+		param3.ParameterName = "@bDuplicateNameCheck";
+		param3.Value         = enableDuplicateCheck;
+
+		cmd.Parameters.Add(param);
+		cmd.Parameters.Add(param1);
+		cmd.Parameters.Add(param2);
+        cmd.Parameters.Add(param3);
+   }
+   void UpdateUpdProjectfile(string entityName)
+  {
+	//Commenting code as we are using wild cards for cs project 
+	  
+	 string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+	  string sqlFileName = string.Format("../Titan.Database/dbo/Stored Procedures/sp{0}Update.sql",entityName);
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, sqlFileName));
+      File.WriteAllText(outputFilePath, spUpdatetext); 
+      this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+
+      string projectFileNameWithPath = "../Titan.Database/Titan.Database.sqlproj";
+	  string includeFileText =String.Format("<Build Include=\"dbo\\Stored Procedures\\sp{0}Update.sql\" />", entityName);
+	  
+      outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, projectFileNameWithPath));
+	  var currentText = File.ReadAllText(outputFilePath);
+
+	  if (currentText.IndexOf(includeFileText) == -1) {
+	        currentText = currentText.Replace("<!-- For T4 -->","<!-- For T4 -->\n\t" + includeFileText);
+			File.WriteAllText(outputFilePath, currentText); 
+	  }
+	  
+	  
+  }
+#>

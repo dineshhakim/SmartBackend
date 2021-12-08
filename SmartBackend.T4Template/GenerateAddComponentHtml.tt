@@ -1,0 +1,68 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".html" #>
+<#
+var cCaseAdd1 =Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1);
+#>
+
+<div class="ui-g-12">
+    <p-breadcrumb [model]="breadcrumbs"></p-breadcrumb><br />
+    <div class="card card-w-title">
+        <p-growl [value]="msgs"></p-growl>
+        <form #<#= cCaseAdd1 #>Form="ngForm" enctype="application/x-www-form-urlencoded" (ngSubmit)="onSubmit(<#= cCaseAdd1 #>Form.value)">
+            <div class="warningMsgHeader">
+                <h2 class="on-left"> Add <#= entityName #> </h2>
+                <div class="on-right margin-top-10"><em>Any change here will affect all portals.</em></div>
+            </div>
+            <div class="clearfix"></div>
+
+            <p-panel header="Information">
+                <div class="body">
+                    <div class="ui-grid-row">
+                        <div class="md-inputfield ui-g-12 ui-md-6">
+                            <input type="text" pInputText name="name" id="name" #<#= cCaseAdd1 #>DetailsNameRef="ngModel" [(ngModel)]="name"
+                                   minlength="1" required style="width:100%">
+                            <label><#= entityName #> Name <span>*</span></label>
+                        </div>
+                    </div><br />
+                    <div class="ui-grid-row ">
+                        <div class="ui-g-12 ui-md-12">
+                            <label style="color:#777"><#= entityName #> Description </label>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 md-inputfield">
+                            <p-editor name="description" id="description" [style]="{'min-height':'160px'}" placeholder="Max 250 characters. " #<#= cCaseAdd1 #>DetailsDescriptionRef="ngModel"
+                                      [(ngModel)]="description">
+                                <p-header>
+                                    <select class="ql-size">
+                                        <option value="small"></option>
+
+                                        <option selected></option>
+                                        <option value="large"></option>
+                                        <option value="huge"></option>
+                                    </select>
+                                    <span class="ql-formats">
+                                        <button class="ql-bold" type="button"></button>
+                                        <button class="ql-italic" type="button"></button>
+                                        <button class="ql-underline" type="button"></button>
+                                    </span>
+                                </p-header>
+                            </p-editor>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                 <footer>
+                    <p>* indicates required field</p>
+                    <button id="cancel" name="cancel" pButton type="button" label="Cancel" routerLink="/admin/vehicle/<#= cCaseAdd1.ToLower() #>" class="blue-grey-btn" icon="ui-icon-close">  </button>
+                    <button id="save" name="save" pButton type="submit" [disabled]="!<#= cCaseAdd1 #>Form.valid" icon="ui-icon-save" label="Create" class="green-btn"
+                            [hasPermission]="Permissions.Lookup_<#= entityName #>" [permissionLevel]="PermissionLevel.Create" [disableOrElseHide]="false">  </button>
+
+                </footer>
+                <br />
+            </p-panel>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,59 @@
+﻿using System;
+using Titan.Core.Common.Extensions;
+using Titan.Core.Common.Service;
+using Titan.Model;
+using Titan.Model.Settings;
+using Titan.Model.ViewModelDB;
+using Titan.Repository.CoreInterfaces;
+using Titan.Repository.Repository;
+
+namespace Titan.Core.Common.ServiceImpl
+{
+    public class <#=entityName#>Service : I<#=entityName#>Service
+    {
+        private readonly I<#=entityName#>Repository _repository;
+		private readonly ITitanSetting _titanSettings;
+
+        public <#=entityName#>Service(I<#=entityName#>Repository repository, ITitanSetting titanSettings)
+        {
+            _repository = repository;
+            _titanSettings = titanSettings;
+        }
+
+        public Result<SpTransactionMessage> Create(<#=entityName#>CreateDbViewModel t)
+        {
+            return _repository.Create(t);
+        }
+
+        public Result<SpTransactionMessage> Update(<#=entityName#>UpdateDbViewModel t)
+        {
+            return _repository.Update(t);
+        }
+
+
+        public Result<SpTransactionMessage> Delete(<#=entityName#>DeleteDbViewModel t)
+        {
+            t.IsDeleted = true;
+            return _repository.Delete(t);
+        }
+
+        public Result<SpTransactionMessage> Delete(Guid id)
+
+        {
+            var t = _repository.GetById(id, _titanSettings.DefaultLocale);
+            if (t == null)
+                return
+                    Result.Fail(new SpTransactionMessage
+                    {
+                        Success = false,
+                        Message = @"Object with Id-{id} not found"
+                    });
+
+
+            t.IsDeleted = true;
+			return _repository.Delete(t.ToViewModel<<#=entityName#>DeleteDbViewModel>());
+           
+        }
+	    
+    }
+}

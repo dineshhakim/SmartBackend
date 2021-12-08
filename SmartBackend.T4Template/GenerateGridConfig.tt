@@ -1,0 +1,46 @@
+﻿<#@ template language="C#" hostSpecific="true" #>
+<#@ output extension=".sql" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="Microsoft.SqlServer.Smo" #>
+<#@ assembly name="Microsoft.SqlServer.ConnectionInfo" #>
+
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="Microsoft.SqlServer.Management.Smo" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#
+	 
+		string spGridConfigName = "pr__SYS_GridConfigurationForNewLooup";  
+	
+  
+	
+      using (var conn = new SqlConnection(connectionString))
+      {
+        conn.Open();    
+		SqlCommand cmd = new SqlCommand(spGridConfigName, conn);
+		SetParamsForInsert(cmd,entityName);
+        cmd.CommandType = CommandType.StoredProcedure;
+        spGridConfigtext = (string)cmd.ExecuteScalar();
+      } 
+#>
+
+<#= spGridConfigtext #>
+ 
+<#+
+	 
+	string spGridConfigtext = string.Empty;
+   void SetParamsForInsert(SqlCommand cmd, string name)
+   {
+	    SqlParameter param  = new SqlParameter();
+		param.ParameterName = "@GridTableName";
+		param.Value         = name;
+		cmd.Parameters.Add(param);
+   }
+   
+#>

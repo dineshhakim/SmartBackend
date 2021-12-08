@@ -1,0 +1,94 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".ts" #>
+
+<#
+var cCaseAddCom =Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1);
+#> 
+import { Component } from '@angular/core';
+import { <#= entityName #>Service } from '../../../../../shared/services/Containers/<#= entityName #>Service/<#= cCaseAddCom #>.service';
+import { Validators } from '@angular/forms';
+import { SelectItem, MenuItem, Message } from 'primeng/primeng';
+import { Router, Params, ActivatedRoute } from '@angular/router';
+import { BreadCrumbsService } from '../../../../../shared/services/breadCrumbs/breadCrumbs.service';
+//import { DataTable,PanelMenuModule, PanelModule ,InputTextModule,InputTextareaModule, ButtonModule } from 'primeng/primeng';
+import {Permissions} from "../../../../../shared/Enum/permissions.enum";
+
+import {PermissionLevel} from "../../../../../shared/Enum/permissionLevel.enum";
+
+import {UserPemissionHelper} from "../../../../../shared/services/Containers/PermissionsService/userPermissionsHelper";
+@Component({
+    selector: 'add-<#= cCaseAddCom #>',
+    templateUrl: '../../../../../../app/body/Admin/Vehicle/<#= entityName #>/Add/add.component.html'
+})
+
+export class AddComponent {
+   
+    username: string;
+    description: string;
+    added: any;
+
+    breadcrumbs: MenuItem[];
+    breadcrumbsHome: MenuItem;
+
+    msgs: Message[] = [];
+	Permissions = Permissions;
+
+    PermissionLevel = PermissionLevel;
+
+    constructor(private breadCrumbsService: BreadCrumbsService,
+        private service: <#= entityName #>Service,
+        private router: Router,
+        private route: ActivatedRoute,
+		private userPemissionHelper : UserPemissionHelper) {
+
+    }
+
+    ngOnInit() {
+        this.route.queryParams.subscribe(params => {
+			if (!this.userPemissionHelper.checkPermissionWithRedirect(Permissions.Lookup_<#= entityName #>, PermissionLevel.Read)) {
+				return false;
+			}
+            this.added = params['page'];
+            let breadC = this.breadCrumbsService.getBreadCrumbs();
+            let <#= cCaseAddCom #>AddBreadCrumb = breadC.filter(filter =>
+                filter.pageName === '<#= entityName #>AddPage'
+            )[0];
+
+            console.log("BreadC -----", breadC);
+            console.log("<#= cCaseAddCom #>AddBreadCrumb ---------", <#= cCaseAddCom #>AddBreadCrumb);
+            this.breadcrumbs = [];
+            this.breadcrumbs = <#= cCaseAddCom #>AddBreadCrumb.items;
+
+            console.log("breadcurmbs ------", this.breadcrumbs);
+
+            this.breadcrumbsHome = { routerLink: ['/'] };
+        });
+    }
+
+    onSubmit(formRef) {
+        let formData: any = { name: '', description: '', locale: '', isDeleted: false };
+        formData.name = formRef.name;
+        formData.description = formRef.description;
+        formData.locale = "en-us";
+        console.log(formData);
+        this.service.postAdd(formData).subscribe(res => {
+
+            if (res.isSuccess) {
+                this.msgs = [];
+                this.msgs.push({ severity: 'success', summary: 'Added', detail: '' });
+                setTimeout(() => this.router.navigate(["admin/vehicle/<#= cCaseAddCom.ToLower() #>"]), 1000);
+            }
+            else {
+                this.msgs = [];
+                this.msgs.push({ severity: 'warn', summary: res.errorMessage, detail: '' });
+            }
+
+        }
+        );
+
+    }
+}

@@ -1,0 +1,132 @@
+﻿<#@ template debug="true" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ Assembly Name="System.Core.dll" #>
+<#@ Assembly Name="System.Xml.dll" #>
+<#@ Assembly Name="System.Xml.Linq.dll" #>
+<#@ Assembly Name="System.Windows.Forms.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+
+using System;
+using System.Data;
+using System.Linq;
+using SQLDatabaseQueryContainer;
+using Titan.Model;
+using Titan.Model.Entities;
+using Titan.Model.ViewModelDB;
+using Titan.Repository.CoreInterfaces;
+using Titan.Model.ViewModels;
+using Dapper;
+using Titan.Model.Settings;
+using Titan.Cache.Caching;
+using System.Collections.Generic;
+using Titan.Cache;
+
+namespace Titan.Repository.Repository
+{
+    public class <#=entityName#>Repository : BaseRepository<<#=entityName#>> , I<#=entityName#>Repository
+    {
+	    private IDbHelper _dbHelper;
+		 private readonly ITitanSetting _titanSettings;
+        public <#=entityName#>Repository(IDbHelper dbHelper, ITitanSetting titanSettings) : base(dbHelper)
+        {
+            _dbHelper = dbHelper;
+            _titanSettings = titanSettings;
+        }
+		
+
+        public  <#=entityName#>ViewModel GetById(Guid id, string locale)
+        {
+               var dapper = _dbHelper.GetDbConnection(_dbHelper.DatabaseTitanDB);
+            return
+                dapper.Query<<#=entityName#>ViewModel>(<#=entityName#>Queries.StoreProcSelectById, new {Id = id,Locale = locale, _titanSettings.DefaultLocale}, null, true, null,
+                    CommandType.StoredProcedure).FirstOrDefault();
+        }
+	     <# if (string.IsNullOrEmpty(transTableName)) { #>
+			public IEnumerable<<#=entityName#>ViewModel> GetAll()
+        {
+            string cacheKey = $"<#=entityName#>";
+            var result = CacheProvider.Instance.GetOrAdd<IEnumerable<<#=entityName#>ViewModel>>(cacheKey,
+                () => LoadAllFromDB(), CacheRegions.<#=entityName#>All);
+            return result;
+
+        }
+			private IEnumerable<<#=entityName#>ViewModel> LoadAllFromDB()
+        {
+            var dapper = _dbHelper.GetDbConnection(_dbHelper.DatabaseTitanDB);
+            return
+                dapper.Query<<#=entityName#>ViewModel>(<#=entityName#>Queries.StoreProcSelectAll, null, null, true, null,
+                    CommandType.StoredProcedure);
+        }
+
+		<# } else { #>
+
+			public IEnumerable<<#=entityName#>ViewModel> GetAll(string locale)
+        {
+            string cacheKey = $"<#=entityName#>:{locale}";
+            var result = CacheProvider.Instance.GetOrAdd<IEnumerable<<#=entityName#>ViewModel>>(cacheKey,
+                () => LoadAllFromDB(locale), CacheRegions.<#=entityName#>All);
+            return result;
+
+        }
+		private IEnumerable<<#=entityName#>ViewModel> LoadAllFromDB(string locale)
+        {
+            var dapper = _dbHelper.GetDbConnection(_dbHelper.DatabaseTitanDB);
+            return
+                dapper.Query<<#=entityName#>ViewModel>(<#=entityName#>Queries.StoreProcSelectAll, new
+                {
+                    Locale = locale,
+                    _titanSettings.DefaultLocale
+                }, null, true, null,
+                    CommandType.StoredProcedure);
+        }
+		<# } #>
+	
+		private IEnumerable<<#=entityName#>ViewModel> LoadAllFromDB(string locale)
+        {
+            var dapper = _dbHelper.GetDbConnection(_dbHelper.DatabaseTitanDB);
+		  <# if (string.IsNullOrEmpty(transTableName)) { #>
+            return
+                dapper.Query<<#=entityName#>ViewModel>(<#=entityName#>Queries.StoreProcSelectAll, null, null, true, null,
+                    CommandType.StoredProcedure);
+        <# } else { #>
+	   return
+                dapper.Query<<#=entityName#>ViewModel>(<#=entityName#>Queries.StoreProcSelectAll, new
+                {
+                    Locale = locale,
+                    _titanSettings.DefaultLocale
+                }, null, true, null,
+                    CommandType.StoredProcedure);
+	   <# } #>
+        }
+        public Result<SpTransactionMessage> Create( <#=entityName#>CreateDbViewModel viewModel)
+        {
+              return _dbHelper.ExecuteQuery( <#=entityName#>Queries.StoreProcInsert,
+                viewModel,
+                CommandType.StoredProcedure);
+        }
+
+        public Result<SpTransactionMessage> Update( <#=entityName#>UpdateDbViewModel viewModel)
+        {
+             return _dbHelper.ExecuteQuery( <#=entityName#>Queries.StoreProcUpdate,
+                viewModel,
+                CommandType.StoredProcedure);
+        }
+
+        public Result<SpTransactionMessage> Delete( <#=entityName#>DeleteDbViewModel deleteViewModel)
+        {
+			//Sp is not created for Delete
+			return _dbHelper.ExecuteQuery(<#=entityName#>Queries.StoreProcDelete,
+                deleteViewModel,
+                CommandType.StoredProcedure);
+        }
+    }
+}
+<#+  
+ 
+#>

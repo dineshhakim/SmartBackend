@@ -1,0 +1,38 @@
+﻿<#@ template debug="true" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ Assembly Name="System.Core.dll" #>
+<#@ Assembly Name="System.Xml.dll" #>
+<#@ Assembly Name="System.Xml.Linq.dll" #>
+<#@ Assembly Name="System.Windows.Forms.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+
+
+using System;
+using System.Collections.Generic;
+using Titan.Model;
+using Titan.Model.Entities;
+using Titan.Model.ViewModelDB;
+using Titan.Model.ViewModels;
+using Titan.Repository.Repository;
+namespace Titan.Core.Common.Service
+{
+	public interface I<#=entityName#>Service 
+    {
+        //<#=entityName#>ViewModel GetById(Guid id);
+        //<#=entityName#>ViewModel GetByIdAndByLocale(Guid id, string locale);          
+        Result<SpTransactionMessage> Create(<#=entityName#>CreateDbViewModel tfc);
+        Result<SpTransactionMessage> Update(<#=entityName#>UpdateDbViewModel tfc);
+        Result<SpTransactionMessage> Delete(<#=entityName#>DeleteDbViewModel tfd);
+    }
+ }
+
+
+<#+  
+ 
+#>

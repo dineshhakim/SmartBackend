@@ -15,7 +15,7 @@ namespace SmartBackend.Repository.Helpers
     {
         public enum Database
         {
-            TitanDB
+            SmartDB
         }
         IConfiguration _configuration;
         public DbHelper(IConfiguration iconfiguration)
@@ -38,7 +38,7 @@ namespace SmartBackend.Repository.Helpers
             string connString = String.Empty;
             switch (db)
             {
-                case Database.TitanDB:
+                case Database.SmartDB:
                     connString = GetConnectionString("ConnectionStrings");
                     break;
                 default:
@@ -53,13 +53,13 @@ namespace SmartBackend.Repository.Helpers
         {
             get
             {
-                return Database.TitanDB;
+                return Database.SmartDB;
             }
         }
 
         public IDbConnection GetDbConnection(Database database)
         {
-
+            DbProviderFactories.RegisterFactory(PROVIDER_NAME, SqlClientFactory.Instance);
             DbProviderFactory factory = DbProviderFactories.GetFactory(PROVIDER_NAME);
             DbConnection connection = factory.CreateConnection();
             connection.ConnectionString = GetConnectionString(database);
@@ -68,7 +68,7 @@ namespace SmartBackend.Repository.Helpers
 
         public IDbConnection GetDbConnection()
         {
-            return GetDbConnection(Database.TitanDB);
+            return GetDbConnection(Database.SmartDB);
         }
 
         private SqlConnection GetConnection(Database database)

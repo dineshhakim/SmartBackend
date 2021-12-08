@@ -1,0 +1,104 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".ts" #>
+<# 
+var cCaseDetails2 =Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1);
+#>
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute, Params } from '@angular/router';
+import { <#= entityName #>Service } from '../../../../../shared/services/Containers/<#= entityName #>Service/<#= cCaseDetails2 #>.service'
+import { DataTable, TabViewModule, LazyLoadEvent, ButtonModule, InputTextareaModule, CheckboxModule, InputSwitchModule, InputTextModule, PanelModule, FileUploadModule, Message } from 'primeng/primeng';
+import { SelectItem, ConfirmationService, MenuItem } from 'primeng/primeng';
+import { Validators } from '@angular/forms';
+import { BreadCrumbsService } from '../../../../../shared/services/breadCrumbs/breadCrumbs.service';
+import {Permissions} from "../../../../../shared/Enum/permissions.enum";
+
+import {PermissionLevel} from "../../../../../shared/Enum/permissionLevel.enum";
+
+import {UserPemissionHelper} from "../../../../../shared/services/Containers/PermissionsService/userPermissionsHelper";
+
+@Component({
+    selector: '<#= cCaseDetails2 #>-detail',
+    templateUrl: '../../../../../../app/body/Admin/Vehicle/<#= entityName #>/Details/details.component.html'
+})
+export class DetailsComponent {
+
+    <#= entityName #>Details: any = {
+        id: '',
+        isDeleted: false,
+        name: '',
+        description: '',
+        userCreatedById: '',
+        userModifiedById: '',
+        createdOn: '',
+        modifiedOn: ''
+    };
+
+    msgs: Message[];
+    uploadedFiles: any[] = [];
+
+    public <#= entityName #>Id: string;
+    breadcrumbs: MenuItem[];
+    breadcrumbsHome: MenuItem;
+	Permissions = Permissions;
+
+    PermissionLevel = PermissionLevel;
+    constructor(
+        private breadCrumbsService: BreadCrumbsService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private service: <#= entityName #>Service,
+		private userPemissionHelper : UserPemissionHelper
+    )
+    { }
+
+    ngOnInit() {
+        this.route.params.forEach((params: Params) => {
+			if (!this.userPemissionHelper.checkPermissionWithRedirect(Permissions.Lookup_<#= entityName #>, PermissionLevel.Read)) {
+				return false;
+			}
+            this.route.params.subscribe(params => console.log(params['id']));
+
+            this.<#= entityName #>Id = params['id']; // (+) converts string 'id' to a number
+
+            let breadC = this.breadCrumbsService.getBreadCrumbs();
+            let <#= cCaseDetails2 #>DetailsBreadCrumb = breadC.filter(filter =>
+                filter.pageName === '<#= entityName #>DetailsPage'
+            )[0];
+
+            console.log("BreadC -----", breadC);
+            console.log("<#= cCaseDetails2 #>DetailsBreadCrumb ---------", <#= cCaseDetails2 #>DetailsBreadCrumb);
+            this.breadcrumbs = [];
+            this.breadcrumbs = <#= cCaseDetails2 #>DetailsBreadCrumb.items;
+
+            console.log("breadcurmbs ------", this.breadcrumbs);
+
+            this.breadcrumbsHome = { routerLink: ['/'] };
+        });
+
+        this.service.getById(this.<#= entityName #>Id).subscribe(<#= entityName #>Details => {
+            this.<#= entityName #>Details = <#= entityName #>Details.result;
+            this.<#= entityName #>Details.id = this.<#= entityName #>Id;
+            console.log(this.<#= entityName #>Details);
+        });
+    }
+
+    onSubmit(formRef) {
+        this.service.postUpdate(this.<#= entityName #>Details).subscribe(<#= entityName #>Details => {
+            if (<#= entityName #>Details.isSuccess) {
+                this.msgs = [];
+                this.msgs.push({ severity: 'success', summary: 'Saved', detail: '' });
+				setTimeout(() => this.router.navigate(["admin/vehicle/<#= cCaseDetails2.ToLower() #>"]), 1000);
+            }
+            else {
+                this.msgs = [];
+                this.msgs.push({ severity: 'warn', summary: <#= entityName #>Details.errorMessage, detail: '' });
+            }
+        });
+
+    }
+}

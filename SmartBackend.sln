@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28711.60
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartBackend", "SmartBackend\SmartBackend.csproj", "{BCBA0F16-D0E8-4ADA-B61F-FCC2297E6778}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartBackend.Core.Common", "SmartBackend.Core.Common\SmartBackend.Core.Common.csproj", "{267FD398-8F40-4AF0-81A2-64FB24194ADC}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "SmartBackend.Database", "SmartBackend.Database\SmartBackend.Database.sqlproj", "{080A3F33-1799-416F-93E0-E69968FC5C78}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartBackend.T4Template", "SmartBackend.T4Template\SmartBackend.T4Template.csproj", "{347D38EA-3DB2-4126-9F7C-3A3F8157144A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{080A3F33-1799-416F-93E0-E69968FC5C78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{080A3F33-1799-416F-93E0-E69968FC5C78}.Release|Any CPU.Build.0 = Release|Any CPU
 		{080A3F33-1799-416F-93E0-E69968FC5C78}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{347D38EA-3DB2-4126-9F7C-3A3F8157144A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{347D38EA-3DB2-4126-9F7C-3A3F8157144A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{347D38EA-3DB2-4126-9F7C-3A3F8157144A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{347D38EA-3DB2-4126-9F7C-3A3F8157144A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

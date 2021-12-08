@@ -1,0 +1,354 @@
+﻿<#@ template language="C#" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ include file="TemplateFileManagerV2.1.ttinclude" #>
+<#@ Assembly Name="System.Core" #>
+<#@ Assembly Name="System.Windows.Forms" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+<#@ import namespace="Microsoft.SqlServer.Management.Smo" #>
+<#@ assembly name="System.Xml" #>
+<#@ import namespace="System.Xml" #>
+<#
+#>
+<#
+				//Update entityName value and static value below 
+
+
+				string entityName = "FormComponent";
+				string tableName = entityName;
+				string transTableName = "";
+				string sqlServer = "localhost";    
+				string sqlDatabase = "SmartDb";
+
+                
+                /*
+                *
+                * WHEN DUPLICATE CHECK IS ENABLED, THE SCRIPT EXPECTS COLUMN NAMED "NAME" IN
+                * TRANSLATION TABLE OR THE MAIN TABLE.
+                *   
+                */
+     
+                bool enableDuplicateCheck = false;
+
+
+				/* DO NOT MODIFY */
+				string classNamespace = "Titan.Model.Entities";
+  				string destinationFolder = "PocoFolder";	
+				string connectionString = "Data Source=" + sqlServer +  ";Initial Catalog=" + sqlDatabase +";Integrated Security=true;";
+#>
+
+
+<#
+				var manager = TemplateFileManager.Create(this);
+				
+#>
+<#@ include file="databasequeries.t4include"  #>  
+<#				CreateSQLQueriesOutput(entityName); #>
+<#@ include file="RepositoryInterface.t4include"  #>  
+<#				CreateRepoInterface(entityName); #>
+<#@ include file="RepositoryImplementation.t4include"  #>  
+<#				CreateRepoImplementation(entityName);#>
+<#@ include file="ServiceInterface.t4include"  #>  
+<#				CreateServiceInterface(entityName);#>
+<#@ include file="ServiceImplementation.t4include"  #>  
+<#				CreateServiceImplementation(entityName);#>
+<#@ include file="GeneratePoco.t4include"  #>  
+<#				CreatePoco(entityName); #>
+<#@ include file="GenerateDbViewModel.t4include"  #>  
+<#				CreateDbViewModel(entityName); #>
+<#@ include file="GenerateViewModel.t4include"  #>  
+<#				CreateViewModel(entityName); #>
+<#				UpdateUnityConfig(entityName);#>
+<#				UpdateCacheRegion(entityName);#>
+<#@ include file="GenerateApiController.tt"  #>  
+<#				CreateApiController(entityName); #>
+<#@ include file="GenerateInsert.tt"  #>  
+<# #>
+<#@ include file="GenerateUpdate.tt"  #>  
+<# #>
+<#@ include file="GenerateSelectById.tt"  #>  
+<# #>
+<#@ include file="GenerateSelectAll.tt"  #>  
+<# #>
+<#@ include file="GenerateGridConfig.tt"  #>  
+<# #>
+<#@ include file="PermissionPostDeploymentAdd.tt"  #>  
+<# #>
+
+
+<#+ 
+  
+				string sqlQueryProjectFileName = "../SQLDatabaseQueryContainer/SQLDatabaseQueryContainer.csproj";
+				string repoProjectFileName ="../Titan.Repositories/Titan.Repository.csproj";
+				string serviceProjectFileName = "../Titan.Core.Common/Titan.Core.Common.csproj";
+				string pocoProjectFileName = "../Titan.Models/Titan.Model.csproj";
+
+				
+				
+				//string entityComponentTSName = string.Format("{0}.component.ts", Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1));
+				
+				   
+ 
+				
+				void CreateEntityComponentHtmlFile(string entityName)
+				{
+                            string entityComponentHtmlName = string.Format("{0}.component.html", Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1));
+							string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles";
+							string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, entityComponentHtmlName));	
+							File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());    
+							this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+	 
+				}
+				void CreateEntityComponentTSFile(string entityName)
+				{
+                                string entityComponentTSName = string.Format("{0}.component.ts", Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1));
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, entityComponentTSName));	
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+				}
+				void CreateEntityModuleTSFile(string entityName)
+				{
+								string entityModuleTSName = string.Format("{0}.module.ts", Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1));
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, entityModuleTSName));	 
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+				}
+				void CreateEntityRouteTSFile(string entityName)
+				{
+								string entityRouteTSName = string.Format("{0}.routes.ts", Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1));
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, entityRouteTSName));	 
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+				}
+				void CreateAddComponentHtmlFile(string entityName)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Add";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "add.component.html"));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+				}
+				void CreateAddComponentTSFile(string entityName)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Add";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "add.component.ts"));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+				}
+				void CreateAddModuleTSFile(string entityName)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Add";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "add.module.ts"));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);   
+				}
+				void CreateAddRouteTSFile(string entityName)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Add";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "add.routes.ts"));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+				}
+				void CreateDetailsComponentHtmlFile(string entityName)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Details";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "details.component.html"));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+				}
+				void CreateDetailsComponentTSFile(string entityName)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Details";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "details.component.ts"));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+				}
+				void CreateDetailsModuleTSFile(string entityName)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Details";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "details.module.ts"));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);   
+				}
+				void CreateDetailsRouteTSFile(string entityName)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Details";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "details.routes.ts"));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+				}  
+				void CreateServiceTSFile(string entityName)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\Service";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1) +"."+"service.ts"));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);   
+				}
+				void CreateApiUrlsTSFile(string entityName)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile) +"\\WebCoreFiles\\ApiUrls";
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, Char.ToLowerInvariant(entityName[0]) + entityName.Substring(1) +"ApiUrls.ts"));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString());	 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);  
+				}
+    
+				void CreateSQLQueriesOutput(string entityName)
+				{
+                                string sqlProjectFileIncludeText = string.Format("<Compile Include=\"{0}Queries.cs\" />",entityName);                    
+                                string sqlQueryFileName =  string.Format("../SQLDatabaseQueryContainer/{0}Queries.cs",entityName);// "../SQLDatabaseQueryContainer/TestStageQueries.cs";
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, sqlQueryFileName));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+								UpdateProjectfile(sqlQueryProjectFileName,sqlProjectFileIncludeText);
+				}
+				void CreateRepoInterface(string entityName)
+				{
+								string repoInterfaceFileName = string.Format("../Titan.Repositories/CoreInterfaces/I{0}Repository.cs",entityName);
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, repoInterfaceFileName));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+								UpdateProjectfile(repoProjectFileName,string.Format("<Compile Include=\"CoreInterfaces\\I{0}Repository.cs\" />",entityName));
+				}
+				void CreateRepoImplementation(string entityName)
+				{
+								string repoImplementationFileName = string.Format("../Titan.Repositories/Repository/{0}Repository.cs",entityName);
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, repoImplementationFileName));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+								UpdateProjectfile(repoProjectFileName,string.Format("<Compile Include=\"Repository\\{0}Repository.cs\" />",entityName));
+				}
+				void CreateServiceInterface(string entityName)
+				{
+								string serviceInterfaceFileName =  string.Format("../Titan.Core.Common/Service/I{0}Service.cs",entityName);
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, serviceInterfaceFileName));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+								UpdateProjectfile(serviceProjectFileName,string.Format("<Compile Include=\"Service\\I{0}Service.cs\" />",entityName));
+				}
+				void CreateServiceImplementation(string entityName)
+				{
+								string serviceImplementaionFileName = string.Format("../Titan.Core.Common/ServiceImpl/{0}Service.cs",entityName);
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, serviceImplementaionFileName));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+								//UpdateProjectfile(serviceProjectFileName,string.Format("<Compile Include=\"ServiceImpl\\{0}Service.cs\" />",entityName));
+  
+				}
+				void CreatePoco(string entityName)
+				{
+								string pocoFileName = string.Format("../Titan.Models/Entities/{0}.cs",entityName);
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, pocoFileName));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+								UpdateProjectfile(pocoProjectFileName,string.Format("<Compile Include=\"Entities\\{0}.cs\" />",entityName));
+				}
+				void CreateDbViewModel(string entityName)
+				{
+								string dbCreateViewModelFileName = string.Format("../Titan.Models/ViewModelDb/{0}DbViewModel.cs",entityName);
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, dbCreateViewModelFileName));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+								UpdateProjectfile(pocoProjectFileName,string.Format("<Compile Include=\"ViewModelDB\\{0}DbViewModel.cs\" />",entityName));
+				} 
+				void CreateDbDeleteViewModel(string entityName)
+				{
+								
+				                string dbDeleteViewModelFileName = string.Format("../Titan.Models/ViewModelDb/{0}DeleteDbViewModel.cs",entityName);
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, dbDeleteViewModelFileName));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+								UpdateProjectfile(pocoProjectFileName,string.Format("<Compile Include=\"ViewModelDB\\{0}DeleteDbViewModel.cs\" />",entityName));
+				}
+				void CreateViewModel(string entityName)
+				{
+								string viewModelFileName = string.Format("../Titan.Models/ViewModels/{0}ViewModel.cs",entityName);
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, viewModelFileName));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+								UpdateProjectfile(pocoProjectFileName,string.Format("<Compile Include=\"ViewModels\\{0}ViewModel.cs\" />",entityName));
+				}
+				void CreateApiController(string entityName)
+				{
+								string apiControllerFileName = string.Format("../Titan.WebApi/Controllers/{0}Controller.cs",entityName);
+                                string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, apiControllerFileName));
+								File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+				}
+				void UpdateWebApiProject(string entityName)
+				{
+								//C:\CodeRepository\titanV2\Titan.WebApi
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, "../Titan.WebApi/Titan.WebApi.csproj" ));
+								string unityConfigPath = Path.GetFullPath(Path.Combine(templateDirectory, "../Titan.WebApi/App_Start/UnityConfig.cs" ));
+								var currentText = File.ReadAllText(outputFilePath);
+
+								if (currentText.IndexOf("Controllers\\" + entityName + "Controller.cs") == -1) {
+												currentText = currentText.Replace("<!-- For T4 -->","<!-- For T4 -->\n\t\t<Compile Include=\"Controllers\\" + entityName + "Controller.cs\" />");
+												File.WriteAllText(outputFilePath, currentText); 
+								}
+
+								// Now updating the Unity Config
+								// container.RegisterType<IPlatformService, PlatformService>();
+								// container.RegisterType<IPlatformRepository, PlatformRepository>();
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+				}
+
+				void UpdateUnityConfig(string entityName)
+				{    
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);      
+								string unityConfigPath = Path.GetFullPath(Path.Combine(templateDirectory, "../Titan.WebApi/App_Start/UnityConfig.cs" ));
+								var currentText = File.ReadAllText(unityConfigPath);
+								string replacetext = string.Format(@"container.RegisterType<I{0}Service,{0}Service>();"
+												+ "\n\t\tcontainer.RegisterType <I{0}Repository,{0}Repository>().Configure<Interception>().SetInterceptorFor<I{0}Repository>(new InterfaceInterceptor());;"
+												+ "\n\t\t//T4", entityName);
+								if (currentText.IndexOf(replacetext) == -1) {
+												currentText = currentText.Replace("//T4",replacetext);
+												File.WriteAllText(unityConfigPath, currentText); 
+								}
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+				}
+				void UpdateCacheRegion(string entityName)
+				{    
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);      
+								string cacheRegionPath = Path.GetFullPath(Path.Combine(templateDirectory, "../Titan.Cache/CacheRegions.cs" ));
+								var currentText = File.ReadAllText(cacheRegionPath);
+	  							string replacetext = string.Format(@"public const string {0}All ="+ ((char)34)+"{0}All"+((char)34) +";" + "\n\t\t//T4"  , entityName);
+								if (currentText.IndexOf(replacetext) == -1) {
+												currentText = currentText.Replace("//T4",replacetext);
+												File.WriteAllText(cacheRegionPath, currentText); 
+								}
+								this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+				}
+				void UpdateProjectfile(string projectFileNameWithPath,string includeFileText)
+				{
+								string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+								string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, projectFileNameWithPath));
+								var currentText = File.ReadAllText(outputFilePath);
+
+
+								File.WriteAllText(outputFilePath, currentText); 
+	  /*if (currentText.IndexOf(includeFileText) == -1) {
+	        currentText = currentText.Replace("<!-- For T4 -->","<!-- For T4 -->\n\t" + includeFileText);
+			File.WriteAllText(outputFilePath, currentText); 
+	  }*/
+	  
+				}
+  
+		 
+#>

@@ -1,0 +1,188 @@
+﻿<#@ template language="C#" hostspecific="true" debug="True" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="Microsoft.SqlServer.Smo" #>
+<#@ assembly name="Microsoft.SqlServer.ConnectionInfo" #>
+<#@ assembly name="Microsoft.SqlServer.Management.Sdk.Sfc" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="Microsoft.SqlServer.Management.Smo" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#
+    //**********************************************************************************************
+    // This T4 generates POCOs from the specified DB and saves them to the specified folder which 
+    // is relative to the template's location. One file per table/POCO.
+    //**********************************************************************************************
+ 
+    //****************************
+    // DEFINE YOUR VARIABLES HERE
+    //****************************
+    // The SQL server name or IP
+    string sqlServer = @"SILVERMOON\SQLEXPRESS";
+    // The SQL username
+    string sqlLogin = "admin";
+    // The SQL password
+    string sqlPassword = "password";
+    // The SQL database to generate the POCOs for
+    string sqlDatabase = "TitanDb";
+    // The namespace to apply to the generated classes
+    string classNamespace = "Your.Namespace.Here";
+    // The destination folder for the generated classes, relative to this file's location.
+    string destinationFolder = "PocoFolder";
+    
+	string tableName = "Bodystyle";
+	string transTableName = tableName + "Translation";
+
+    // Loop over each table and create a class file!
+    Server server = new Server(sqlServer);
+    server.ConnectionContext.LoginSecure = true;
+    //server.ConnectionContext.Login = sqlLogin;
+    //server.ConnectionContext.Password = sqlPassword;
+    server.ConnectionContext.Connect();
+    
+	List<Table> tables = new List<Table>();
+	Dictionary<string,Column> cols = new Dictionary<string,Column>();
+	foreach (Table table in server.Databases[sqlDatabase].Tables)
+    {
+	   if (table.Name == tableName || table.Name ==transTableName) {
+		 foreach (Column col in table.Columns)
+			{
+			  if (!cols.ContainsKey(col.Name)){
+				  cols.Add(col.Name, col);
+              }
+			}
+	      tables.Add(table);
+	   }
+	}
+
+	for (int k =0 ; k<1; k++) 
+
+    //foreach (Table table in server.Databases[sqlDatabase].Tables)
+    {
+       
+#>
+using System;
+ 
+namespace <#= classNamespace #>
+{
+    /// <summary>
+    /// Represents a <#= tableName #>.
+    /// NOTE: This class is generated from a T4 template - you should not modify it manually.
+    /// </summary>
+    public class <#= tableName #> 
+    {
+<# 
+        // Keep count so we don't whitespace the last property/column
+        int columnCount = cols.Count;
+        int i = 0;
+ 
+        // Iterate all columns
+		foreach(KeyValuePair<string,Column> entry in cols)
+        //foreach (Column col in table.Columns)
+        {
+		    Column col = entry.Value;
+            i++;
+            string propertyType = GetNetDataType(col.DataType.Name);
+ 
+            // If we can't map it, skip it
+            if (string.IsNullOrWhiteSpace(propertyType))
+            {
+                // Skip
+                continue;
+            }
+ 
+            // Handle nullable columns by making the type nullable
+            if (col.Nullable && propertyType != "string")
+            {
+                propertyType += "?";
+            }
+#>
+        public <#= propertyType #> <#= col.Name #> { get; set; }
+<#
+            // Do we insert the space?
+            if (i != columnCount)
+            {
+#>
+ 
+<#
+            }
+#>
+<#
+        }
+#>
+    }
+}      
+<#
+        // Write new POCO class to its own file
+        //SaveOutput(table.Name + ".cs", destinationFolder);
+		CreatePoco(tableName + ".cs");
+    } 
+#>
+<#+
+    public static string GetNetDataType(string sqlDataTypeName)
+    {
+        switch (sqlDataTypeName.ToLower())
+        {
+            case "bigint":
+                return "Int64";
+            case "binary":
+            case "image":
+            case "varbinary":
+                return "byte[]";
+            case "bit":
+                return "bool";
+            case "char":
+                return "char";
+            case "datetime":
+            case "smalldatetime":
+                return "DateTime";
+            case "decimal":
+            case "money":
+            case "numeric":
+                return "decimal";
+            case "float":
+                return "double";
+            case "int":
+                return "int";
+            case "nchar":
+            case "nvarchar":
+            case "text":
+            case "varchar":
+            case "xml":
+                return "string";
+            case "real":
+                return "single";
+            case "smallint":
+                return "Int16";
+            case "tinyint":
+                return "byte";
+            case "uniqueidentifier":
+                return "Guid";
+                 
+            default:
+                return null;
+        }
+    }
+ 
+    void SaveOutput(string outputFileName, string destinationFolder)
+    {
+        // Write to destination folder
+        string templateDirectory = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Host.TemplateFile), destinationFolder));
+        string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, outputFileName));
+        File.Delete(outputFilePath);
+        File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+ 
+        // Flush generation
+        this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+    }
+	 void CreatePoco(string filename)
+  {
+      string templateDirectory = Path.GetDirectoryName(Host.TemplateFile);
+      string outputFilePath = Path.GetFullPath(Path.Combine(templateDirectory, filename));
+      File.WriteAllText(outputFilePath, this.GenerationEnvironment.ToString()); 
+      this.GenerationEnvironment.Remove(0, this.GenerationEnvironment.Length);
+  }
+#>

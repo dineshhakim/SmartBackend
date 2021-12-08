@@ -1,0 +1,47 @@
+﻿
+<#@ output extension=".cs" #>
+<#@ Assembly Name="System.Core.dll" #>
+<#@ Assembly Name="System.Xml.dll" #>
+<#@ Assembly Name="System.Xml.Linq.dll" #>
+<#@ Assembly Name="System.Windows.Forms.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+ 
+
+using System;
+using System.Data;
+using Titan.Model;
+using Titan.Model.Entities;
+using Titan.Model.ViewModelDB;
+using Titan.Repository.Repository;
+using Titan.Model.ViewModels;
+using Titan.Cache.Caching;
+using System.Collections.Generic;
+namespace Titan.Repository.CoreInterfaces {
+  public interface I<#=entityName#>Repository {
+
+		<#=entityName#>ViewModel GetById(Guid id, string locale);
+		<# if (string.IsNullOrEmpty(transTableName)){ #>
+	   IEnumerable<<#=entityName#>ViewModel> GetAll();
+		<# } else {#>
+	   IEnumerable<<#=entityName#>ViewModel> GetAll(string locale);
+		<# } #>
+		
+		[RemoveCache(Key = CacheRegions.<#=entityName#>All)]
+        Result<SpTransactionMessage> Create(<#=entityName#>CreateDbViewModel viewModel);
+		[RemoveCache(Key = CacheRegions.<#=entityName#>All)]
+        Result<SpTransactionMessage> Update(<#=entityName#>UpdateDbViewModel viewModel);
+		[RemoveCache(Key = CacheRegions.<#=entityName#>All)]
+        Result<SpTransactionMessage> Delete(<#=entityName#>DeleteDbViewModel deleteViewModel);
+  }
+ }
+
+
+<#+  
+  
+#>

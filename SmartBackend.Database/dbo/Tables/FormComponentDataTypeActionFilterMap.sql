@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[FormComponentDataTypeActionFilterMap]
 (
 	[Id] UniqueIdentifier NOT NULL PRIMARY KEY,
-	[FormComponentDataTypeMapId] uniqueIdentifier NULL,
+	[FormComponentControlId] uniqueIdentifier NULL,
 	[ParentId] uniqueIdentifier NULL,
 	[FormComponentActionTypeId] uniqueIdentifier NULL,
 	[FormComponentActionFilterId] uniqueIdentifier NULL,
@@ -15,6 +15,6 @@
     [CreatedOn]        DATETIME2 (7)    NOT NULL,
     [UserModifiedById] UNIQUEIDENTIFIER NULL,
     [ModifiedOn]       DATETIME2 (7)    NULL,
-	CONSTRAINT [FK_FormComponentDataTypeActionFilterMap_TitanUser] FOREIGN KEY ([UserCreatedById]) REFERENCES [dbo].[TitanUser] ([Id]),
-    CONSTRAINT [FK_FormComponentDataTypeActionFilterMap_TitanUser1] FOREIGN KEY ([UserModifiedById]) REFERENCES [dbo].[TitanUser] ([Id])
+	CONSTRAINT [FK_FormComponentDataTypeActionFilterMap_TitanUser] FOREIGN KEY ([UserCreatedById]) REFERENCES [dbo].[User] ([Id]),
+    CONSTRAINT [FK_FormComponentDataTypeActionFilterMap_TitanUser1] FOREIGN KEY ([UserModifiedById]) REFERENCES [dbo].[User] ([Id])
 )

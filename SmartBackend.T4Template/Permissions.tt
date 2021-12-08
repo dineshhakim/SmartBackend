@@ -1,0 +1,95 @@
+﻿<#@ template language="C#" debug="true" hostspecific="True" #>
+<#@ output extension=".cs"#>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#
+
+//*** Edit these settings below ***
+
+var connectionString = "Data Source=45.35.48.62;Initial Catalog=TitanDB;User Id=EnginePortalUser;Password=EnginePortalUser";
+var sourceTableName = "Permissions";
+var sourceValueColumnName = "Id";
+var sourceTypeNameColumnName = @"CASE 
+		WHEN s.ParentId IS NOT NULL
+			THEN isnull((
+						SELECT NAME
+						FROM Permissions AS p
+						WHERE p.Id = s.ParentId
+						), '') + '_' + NAME
+		ELSE NAME
+		END AS Name";
+		var sourceValueColumnNameAlias = sourceValueColumnName;
+var sourceTypeNameColumnNameAlias ="Name";
+var flagsAttribute = false;
+
+//*** that's it ***
+
+#>
+<# if(flagsAttribute) { WriteLine("using System;"); } #>
+using System.Runtime.Serialization;
+
+namespace <#=System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("NamespaceHint")#>
+{
+<# if(flagsAttribute) { WriteLine("\t[Flags]"); } #>
+	
+	public enum <#=Path.GetFileNameWithoutExtension(Host.TemplateFile)#>
+	{
+<#
+	try {
+		using (SqlConnection connection = new SqlConnection(connectionString))
+		{
+			SqlCommand command = new SqlCommand("SELECT " + sourceValueColumnName + ", " + sourceTypeNameColumnName + " FROM " + sourceTableName  + " AS S ORDER BY " + "case when ParentID  IS null then Id else isnull(ParentID,0) end * 1000 + Id ASC", connection);
+			
+			connection.Open();
+			SqlDataReader reader = command.ExecuteReader();
+
+			if (reader.HasRows)
+			{
+				var i = 0;
+				while (reader.Read())
+				{
+					if(i > 0) {
+						WriteLine(",");
+					}
+					i++;
+					var name = reader[sourceTypeNameColumnNameAlias].ToString();
+					var value = reader[sourceValueColumnNameAlias].ToString();
+
+					if(!String.IsNullOrWhiteSpace(name))
+					{
+						StringBuilder sb = new StringBuilder(name.Length);
+
+						if (name.Length < 2)
+							name = name.ToUpper();
+
+						string[] words = name.Split(new char[] { }, StringSplitOptions.RemoveEmptyEntries);
+						foreach (string word in words)
+							sb.Append(string.Format("{0}{1}", word.Substring(0, 1).ToUpper(), word.Substring(1)));
+						name = sb.ToString();
+					}
+
+					Write("\t\t {0} = {1}", name, value);
+				}
+				WriteLine("");
+			}
+			else
+			{
+				WriteLine("\t\t//No data found in source table");
+			}
+			reader.Close();
+		}
+	} catch(Exception ex) {
+		WriteLine("\t\t/*");
+		WriteLine("\t\tError running template:");
+		WriteLine("\t\t" + ex.Message);
+		WriteLine("\t\t*/");
+	}
+	#>
+	}
+}

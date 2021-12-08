@@ -1,0 +1,115 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Scripty" Version="0.7.4" />
+    <PackageReference Include="Scripty.MsBuild" Version="0.7.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="GenerateAddComponentHtml.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateAddComponetTS.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateAddModule.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateAddRoutesTS.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateAllAngularTemplates.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateApiController.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateApiUrls.ts">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>GenerateApiUrls.tt</DependentUpon>
+    </None>
+    <None Update="GenerateApiUrls.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>GenerateApiUrls.ts</LastGenOutput>
+    </None>
+    <None Update="GenerateDetailsComponentHtml.html">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>GenerateDetailsComponentHtml.tt</DependentUpon>
+    </None>
+    <None Update="GenerateDetailsComponentHtml.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>GenerateDetailsComponentHtml.html</LastGenOutput>
+    </None>
+    <None Update="GenerateDetailsComponentTS.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateDetailsModuleTS.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateDetailsRoutesTS.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateGridConfig.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateInsert.sql">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>GenerateInsert.tt</DependentUpon>
+    </None>
+    <None Update="GenerateInsert.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>GenerateInsert.sql</LastGenOutput>
+    </None>
+    <None Update="GenerateSelectAll.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateSelectById.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateServiceTS.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="GenerateUpdate.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="MultipleOutputFiles.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MultipleOutputFiles.cs</LastGenOutput>
+    </None>
+    <None Update="PermissionPostDeploymentAdd.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="Permissions.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="Poco.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>   
+   
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="MultipleOutputFiles.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MultipleOutputFiles.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>
